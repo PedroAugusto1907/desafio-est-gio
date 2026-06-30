@@ -1,6 +1,6 @@
 import { AccountNotFoundError } from '../errors/AccountNotFoundError';
 import { InsufficientBalanceError } from '../errors/InsufficientBalanceError';
-import { accountRepository } from '../repositories/accountRepository ';
+import { accountRepository } from '../repositories/accountRepository';
 import { Account } from '../types/account';
 
 const TARIFA_CORRENTE = 1.0;
