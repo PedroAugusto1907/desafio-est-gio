@@ -6,5 +6,6 @@ const router = Router();
 router.get('/accounts', accountController.listar);
 router.get('/accounts/:id', accountController.buscarPorId);
 router.post('/accounts/:id/saque', accountController.saque);
+router.post('/accounts/:id/transferencia', accountController.transferencia);
 
 export default router;

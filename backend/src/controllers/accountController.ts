@@ -9,6 +9,11 @@ interface SaqueBody {
   valor: number;
 }
 
+interface TransferenciaBody {
+  destinoId: string;
+  valor: number;
+}
+
 export const accountController = {
   listar(req: Request, res: Response) {
     res.json(accountService.buscarTodas());
@@ -24,6 +29,20 @@ export const accountController = {
       const { valor } = req.body;
       const account = accountService.saque(req.params.id, Number(valor));
       res.json(account);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  transferencia(
+    req: Request<AccountIdParam, unknown, TransferenciaBody>,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const { destinoId, valor } = req.body;
+      const resultado = accountService.transferencia(req.params.id, destinoId, Number(valor));
+      res.json(resultado);
     } catch (err) {
       next(err);
     }

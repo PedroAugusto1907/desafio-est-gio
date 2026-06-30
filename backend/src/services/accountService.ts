@@ -50,6 +50,32 @@ export const accountService = {
     return accountRepository.updateBalance(accountId, novoSaldo)!;
   },
 
+  transferencia(
+    origemId: string,
+    destinoId: string,
+    valor: number,
+  ): { origem: Account; destino: Account } {
+    if (valor <= 0) throw new Error('Valor de transferência deve ser maior que zero');
+    if (origemId === destinoId) throw new Error('Conta de origem e destino não podem ser iguais');
+
+    const origem = getAccount(origemId);
+    const destino = getAccount(destinoId);
+
+    const valorTotal = calcularValorTotal(origem, valor);
+    validarSaldoSuficiente(origem, valorTotal);
+
+    const novoSaldoOrigem = origem.balance - valorTotal;
+    const novoSaldoDestino = destino.balance + valor;
+
+    accountRepository.updateBalance(origemId, novoSaldoOrigem);
+    accountRepository.updateBalance(destinoId, novoSaldoDestino);
+
+    return {
+      origem: accountRepository.findById(origemId)!,
+      destino: accountRepository.findById(destinoId)!,
+    };
+  },
+
   buscarTodas(): Account[] {
     return accountRepository.findAll();
   },
