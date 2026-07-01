@@ -1,61 +1,111 @@
-# Desafio Técnico — Banco 🏦
+# Banco — Desafio Técnico Agilize
 
-Bem-vindo(a) ao desafio técnico do **Processo Seletivo Agilize — Estágio em Tecnologia**!
+Aplicação de banco com backend em API REST (Node.js + TypeScript + Express). Implementa as
+operações de **saque** (obrigatória) e **transferência** (diferencial), respeitando as regras de
+tarifa e limite de cheque especial por tipo de conta (Corrente e Poupança).
 
-Este desafio avalia sua capacidade de transformar **regras de negócio** em um sistema **fullstack**
-funcional, bem organizado e fácil de executar.
+> ⚠️ **Status atual:** apenas o **backend** está implementado neste momento. O **frontend** ainda
+> não foi desenvolvido. Este README será atualizado assim que a interface web estiver pronta.
 
-> 📄 **A especificação completa está no arquivo [`ESPECIFICACAO.pdf`](./ESPECIFICACAO.pdf).** Leia-a com atenção antes de começar.
->
-> ⏰ **Prazo:** 2 dias corridos — entrega até **00h de 30/06**.
+## Stack
 
----
+- **Backend:** Node.js 20+ / TypeScript 6+, Express 5
+- **Frontend:** ainda não implementado
 
-## 🎯 Resumo
+## Pré-requisitos
 
-Construa um **Banco** sobre dois tipos de conta (corrente e poupança), respeitando as regras de negócio
-da especificação. A operação **obrigatória** é o **saque**; a **transferência** é **opcional** e conta
-como diferencial.
+- [Node.js](https://nodejs.org/) versão 20 ou superior
+- npm (já incluso na instalação do Node)
 
-A solução deve ter **duas partes que se comunicam**:
+## Como executar o backend
 
-- **Backend (API):** expõe uma API HTTP com as operações (toda a regra de negócio fica aqui).
-- **Frontend:** uma interface web que consome a API e permite realizar as operações e ver os resultados.
+```bash
+cd backend
+npm install
+npm run dev
+```
 
-## 💻 Linguagens aceitas (backend)
+O servidor sobe em `http://localhost:3000`.
 
-`JavaScript (Node.js)` · `TypeScript (Node.js)` · `Python` · `Ruby` · `PHP` · `Go`
+Outros scripts disponíveis:
 
-> O **frontend** pode usar HTML/CSS/JavaScript, com ou sem framework.
+```bash
+npm run build   # compila TypeScript para JavaScript (saída em dist/)
+npm run start   # roda a versão compilada (requer build antes)
+npm run lint    # checa o código com ESLint
+npm run format  # formata o código com Prettier
+```
 
----
+## Contas de exemplo (dados pré-carregados em memória)
 
-## 🚀 Como participar
+| id  | tipo     | saldo inicial | dono  |
+| --- | -------- | ------------- | ----- |
+| 1   | CORRENTE | R$ 1000,00    | João  |
+| 2   | POUPANCA | R$ 500,00     | Maria |
 
-1. Faça um **fork** deste repositório.
-2. Implemente **backend** e **frontend** no fork (backend em uma das linguagens aceitas).
-3. **Preencha o README** do seu fork seguindo o modelo em [`SUBMISSION.md`](./SUBMISSION.md)
-   (linguagem, pré-requisitos e **passo a passo para subir backend e frontend**).
-4. Faça **commits ao longo do desenvolvimento** — evite um único commit gigante no final.
-5. Envie o **link do seu fork** para **calison@agilize.com.br**.
+> Os dados não persistem: a cada reinício do servidor, o estado volta ao inicial acima.
 
----
+## Endpoints da API
 
-## ⚠️ Critério eliminatório
+Base URL: `http://localhost:3000/api`
 
-> Projetos que **não executarem** seguindo o README — ou cujo README não permita rodar **backend e
-> frontend** — serão **eliminados**. Backend fora das linguagens aceitas também elimina.
->
-> **Teste o passo a passo em uma máquina/pasta limpa antes de enviar.**
+### Listar todas as contas
 
----
+```
+GET /accounts
+```
 
-## ✅ O que será avaliado
+### Buscar conta por id
 
-- **Funcionamento** — backend e frontend rodam, se comunicam e cumprem as regras de negócio.
-- **Qualidade do código** — clareza, organização, separação de responsabilidades, sem duplicação.
-- **Processo** — histórico de commits coerente e README claro.
+```
+GET /accounts/:id
+```
 
-Dúvidas: **calison@agilize.com.br**
+### Realizar saque
 
-Boa sorte! 🍀
+```
+POST /accounts/:id/saque
+Content-Type: application/json
+
+{ "valor": 100 }
+```
+
+### Realizar transferência
+
+```
+POST /accounts/:id/transferencia
+Content-Type: application/json
+
+{ "destinoId": "2", "valor": 100 }
+```
+
+## Regras de negócio implementadas
+
+| Conta    | Tarifa por saque/transferência | Saldo negativo                                 |
+| -------- | ------------------------------ | ---------------------------------------------- |
+| Corrente | R$ 1,00 por operação           | Permitido até **-R$ 500,00** (cheque especial) |
+| Poupança | Isento                         | **Não permitido**                              |
+
+Na transferência, a tarifa é cobrada apenas da conta de **origem**; o destino recebe o valor cheio.
+
+## Exemplo de uso (via curl)
+
+```bash
+# Saque de R$100 na conta corrente (id 1) — desconta R$101 (R$100 + R$1 de tarifa)
+curl -X POST http://localhost:3000/api/accounts/1/saque \
+  -H "Content-Type: application/json" \
+  -d "{\"valor\": 100}"
+
+# Transferência de R$100 da conta 1 (corrente) para a conta 2 (poupança)
+curl -X POST http://localhost:3000/api/accounts/1/transferencia \
+  -H "Content-Type: application/json" \
+  -d "{\"destinoId\": \"2\", \"valor\": 100}"
+```
+
+### Respostas de erro
+
+| Situação                                      | Status HTTP |
+| --------------------------------------------- | ----------- |
+| Conta não encontrada                          | `404`       |
+| Saldo insuficiente (regra de negócio violada) | `422`       |
+| Erro inesperado                               | `500`       |
