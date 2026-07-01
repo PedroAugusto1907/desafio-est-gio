@@ -1,5 +1,6 @@
 import { AccountNotFoundError } from '../errors/AccountNotFoundError';
 import { InsufficientBalanceError } from '../errors/InsufficientBalanceError';
+import { InvalidValueError } from '../errors/InvalidValueError';
 import { accountRepository } from '../repositories/accountRepository';
 import { Account } from '../types/account';
 
@@ -10,6 +11,13 @@ function getAccount(id: string): Account {
   const account = accountRepository.findById(id);
   if (!account) throw new AccountNotFoundError();
   return account;
+}
+
+function validarValor(valor: number): void {
+  // Cobre ausência, valores não numéricos, zero e negativos
+  if (!Number.isFinite(valor) || valor <= 0) {
+    throw new InvalidValueError('Valor deve ser um número maior que zero');
+  }
 }
 
 function calcularValorTotal(account: Account, valor: number): number {
@@ -39,7 +47,7 @@ function validarSaldoSuficiente(account: Account, valorTotal: number): void {
 
 export const accountService = {
   saque(accountId: string, valor: number): Account {
-    if (valor <= 0) throw new Error('Valor de saque deve ser maior que zero');
+    validarValor(valor);
 
     const account = getAccount(accountId);
     const valorTotal = calcularValorTotal(account, valor);
@@ -55,8 +63,10 @@ export const accountService = {
     destinoId: string,
     valor: number,
   ): { origem: Account; destino: Account } {
-    if (valor <= 0) throw new Error('Valor de transferência deve ser maior que zero');
-    if (origemId === destinoId) throw new Error('Conta de origem e destino não podem ser iguais');
+    validarValor(valor);
+    if (origemId === destinoId) {
+      throw new InvalidValueError('Conta de origem e destino não podem ser iguais');
+    }
 
     const origem = getAccount(origemId);
     const destino = getAccount(destinoId);
