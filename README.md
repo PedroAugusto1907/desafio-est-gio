@@ -4,20 +4,22 @@ Aplicação de banco com backend em API REST (Node.js + TypeScript + Express). I
 operações de **saque** (obrigatória) e **transferência** (diferencial), respeitando as regras de
 tarifa e limite de cheque especial por tipo de conta (Corrente e Poupança).
 
-> ⚠️ **Status atual:** apenas o **backend** está implementado neste momento. O **frontend** ainda
-> não foi desenvolvido. Este README será atualizado assim que a interface web estiver pronta.
-
 ## Stack
 
 - **Backend:** Node.js 20+ / TypeScript 6+, Express 5
-- **Frontend:** ainda não implementado
+- **Frontend:** React + TypeScript, Vite
 
 ## Pré-requisitos
 
 - [Node.js](https://nodejs.org/) versão 20 ou superior
 - npm (já incluso na instalação do Node)
 
-## Como executar o backend
+## Como executar
+
+O projeto tem duas partes que rodam **simultaneamente**, em terminais separados: o backend
+(API) e o frontend (interface web). O frontend depende do backend estar no ar para funcionar.
+
+### 1. Backend (API)
 
 ```bash
 cd backend
@@ -35,6 +37,41 @@ npm run start   # roda a versão compilada (requer build antes)
 npm run lint    # checa o código com ESLint
 npm run format  # formata o código com Prettier
 ```
+
+### 2. Frontend
+
+Em **outro terminal**, na raiz do projeto:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+A interface sobe em `http://localhost:5173`. Abra esse endereço no navegador.
+
+Outros scripts disponíveis:
+
+```bash
+npm run build   # gera a versão de produção (saída em dist/)
+npm run lint    # checa o código com ESLint
+```
+
+> ⚠️ O frontend está configurado para chamar a API em `http://localhost:3000`. Se o backend
+> estiver rodando em outra porta, ajuste a constante `BASE_URL` em
+> `frontend/src/services/api.ts`.
+
+## Como usar
+
+1. Com backend e frontend rodando, abra `http://localhost:5173` no navegador.
+2. A lista de contas é carregada automaticamente ao abrir a página.
+3. Clique em uma conta para selecioná-la (ela fica em destaque).
+4. Preencha o formulário de **Saque** com um valor e confirme — o saldo da conta selecionada é
+   atualizado na tela.
+5. Preencha o formulário de **Transferência** com o ID da conta de destino e um valor — os
+   saldos de origem e destino são atualizados na tela.
+6. Erros de regra de negócio (saldo insuficiente, conta inexistente) aparecem em vermelho
+   abaixo do formulário correspondente.
 
 ## Contas de exemplo (dados pré-carregados em memória)
 
