@@ -6,7 +6,7 @@ tarifa e limite de cheque especial por tipo de conta (Corrente e Poupança).
 
 ## Stack
 
-- **Backend:** Node.js 20+ / TypeScript 6+, Express 5
+- **Backend:** Node.js 20+ / TypeScript 6+, Express 5, Vitest (testes)
 - **Frontend:** React + TypeScript, Vite
 
 ## Pré-requisitos
@@ -32,10 +32,12 @@ O servidor sobe em `http://localhost:3000`.
 Outros scripts disponíveis:
 
 ```bash
-npm run build   # compila TypeScript para JavaScript (saída em dist/)
-npm run start   # roda a versão compilada (requer build antes)
-npm run lint    # checa o código com ESLint
-npm run format  # formata o código com Prettier
+npm run build      # compila TypeScript para JavaScript (saída em dist/)
+npm run start       # roda a versão compilada (requer build antes)
+npm run lint        # checa o código com ESLint
+npm run format      # formata o código com Prettier
+npm run test        # roda a suíte de testes uma vez (Vitest)
+npm run test:watch  # roda os testes em modo watch, reexecutando a cada mudança
 ```
 
 ### 2. Frontend
@@ -125,6 +127,19 @@ Content-Type: application/json
 
 Na transferência, a tarifa é cobrada apenas da conta de **origem**; o destino recebe o valor cheio.
 
+## Testes
+
+A regra de negócio (`accountService`) tem cobertura de testes unitários com **Vitest**, incluindo
+os casos de borda das regras R1 e R2: tarifa, limite exato do cheque especial (-R$500,00), saldo
+zerado, valores inválidos (zero, negativo, `NaN`) e transferência para a mesma conta.
+
+```bash
+cd backend
+npm run test
+```
+
+Os testes ficam em `backend/src/services/accountService.test.ts`.
+
 ## Exemplo de uso (via curl)
 
 ```bash
@@ -141,8 +156,9 @@ curl -X POST http://localhost:3000/api/accounts/1/transferencia \
 
 ### Respostas de erro
 
-| Situação                                      | Status HTTP |
-| --------------------------------------------- | ----------- |
-| Conta não encontrada                          | `404`       |
-| Saldo insuficiente (regra de negócio violada) | `422`       |
-| Erro inesperado                               | `500`       |
+| Situação                                                                          | Status HTTP |
+| --------------------------------------------------------------------------------- | ----------- |
+| Valor inválido (zero, negativo, não numérico) ou transferência para a mesma conta | `400`       |
+| Conta não encontrada                                                              | `404`       |
+| Saldo insuficiente (regra de negócio violada)                                     | `422`       |
+| Erro inesperado                                                                   | `500`       |
