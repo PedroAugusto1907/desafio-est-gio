@@ -14,7 +14,7 @@ export const accountRepository = {
   },
 
   findAll(): Account[] {
-    return accounts;
+    return [...accounts];
   },
 
   create(data: Omit<Account, 'id'>): Account {
