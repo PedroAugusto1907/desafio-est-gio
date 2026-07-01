@@ -1,10 +1,12 @@
 import { randomUUID } from 'crypto';
 import { Account } from '../types/account';
 
-const accounts: Account[] = [
+const SEED_ACCOUNTS: Account[] = [
   { id: '1', type: 'CORRENTE', balance: 1000, owner: 'João' },
   { id: '2', type: 'POUPANCA', balance: 500, owner: 'Maria' },
 ];
+
+let accounts: Account[] = SEED_ACCOUNTS.map((acc) => ({ ...acc }));
 
 export const accountRepository = {
   findById(id: string): Account | undefined {
@@ -25,5 +27,10 @@ export const accountRepository = {
     const account = this.findById(id);
     if (account) account.balance = newBalance;
     return account;
+  },
+
+  // Usado apenas em testes, para garantir estado limpo entre casos de teste.
+  resetForTests(): void {
+    accounts = SEED_ACCOUNTS.map((acc) => ({ ...acc }));
   },
 };
